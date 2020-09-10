@@ -1,0 +1,333 @@
+---
+# lang: FR-fr
+title: '- Manipulation des données -'
+subtitle: 'Travaux pratiques'
+toc-title : Sommaire
+output:
+  pdf_document: 
+    fig_caption: yes
+    keep_md: yes
+    toc: yes
+    toc_depth: 3
+header-includes: \usepackage{graphicx} \usepackage{pdfpages} \usepackage{ragged2e} \usepackage[utf8]{inputenc} \usepackage[T1]{fontenc} \usepackage{fancyhdr} \usepackage{float} \pagestyle{fancy} \fancyhf{}
+  \setlength\headheight{25pt} \fancyhead[LO,RE]{\includegraphics[width=4cm]{cnam_intechmer.png}}
+  \fancyhead[RO,LE]{STM018 Statistiques et traitement de données} \fancyfoot[LO,RE]{Gallon - 2019/2020} \fancyfoot[RO,LE]{\thepage} \renewcommand{\headrulewidth}{0pt}
+  \fancypagestyle{plain}{\pagestyle{fancy}}
+---
+  
+```{r setup, include=FALSE}
+options(tinytex.verbose = TRUE)
+knitr::opts_chunk$set(
+	echo = TRUE,
+	warning = TRUE,
+	comment = ""
+)
+require(ggplot2)
+require(tidyverse)
+```
+\pagebreak
+
+***
+
+>**Objectifs** 
+
+>* Manipuler un jeu de données 
+>* Visualiser des séries statistiques simples et doubles
+>* Réaliser des graphiques claires et compréhensibles
+>* Rédiger un script claire et compréhensible
+
+***
+
+## 1 Les données 
+
+Des données physico-chimiques ont été récoltées autour des cages d’élevage de saumons de l’entreprise Saumon de France (Fig. 1). Les données sont horodatées et géo-localisées.
+
+![Localisation des relevées des paramètres physico-chimiques dans la zone d’exploitation de Saumons de France.](cartoTP2_cageCherbourg.png)
+
+La sonde multi-paramètres de marque NKE (Sambat) a enregistré 6 variables abiotiques toutes les 15 minutes entre avril 2015 et juin 2016 :
+
+* La pression en bar
+* La température en °Celsius
+* La salinité en PSU
+* La turbidité en NTU
+* L’oxygène en % de saturation
+* La fluorescence en $\mu$g/l
+* La localisation des relevés par rapport aux cages d’élevage (« O » : Ouest ; « I » : Intérieur ; « E » : Est)
+
+#### Exercice 1
+
+Après avoir créé un dossier « TP_datamining » dans votre dossier personnel, ajoutez les fichiers "donnees_sonde_rade.csv" et "position_sonde_rade" dans ce dossier.  
+
+Ouvrez RStudio et :
+
+1. Créez un nouveau script
+2. Définissez le répertoire de travail
+3. Importer les librairies `ggplot2`et `tidyverse` dans votre environnement de travail.
+
+```{r}
+
+```
+
+## 2 Manipulation des données
+### 2.1 L'indexation des objets
+
+Il est possible de rechercher des valeurs dans les différents objets de R (vecteurs, matrices et tableau de données) en utilisant les crochets `[ ]`.Un vecteur n’a qu’une seule dimension (sa longueur) : 
+
+`mon_vecteur[3]` : affiche la troisième valeur du vecteur si sa longueur est supérieure ou égale à 3  
+`mon_vecteur[-3]` : supprime la troisième valeur du vecteur si sa longueur est supérieure ou égale à 3  
+`mon_vecteur[c(4,8)]` :  affiche la 4ème et la 8ème valeur du vecteur si sa longueur est supérieure ou égale à 8  
+`mon_vecteur[c(”nomelt1”, ”nomelt3”)]` : affiche les valeurs correspondant aux noms ”nomelt1”, ”nomelt3” définis grâce à la fonction `names()`  
+
+Une matrice et un tableau de données ont deux dimensions (n lignes et p colonnes) :
+
+`ma_matrice[12]` : affiche le 12ème élément lu verticalement  
+`ma_matrice[2,3]` : affiche la valeur à l’intersection de la 2ème ligne et de la 3ème colonne si la matrice a au moins 2 lignes et 3 colonnes.  
+`ma_matrice[-2,3]` : supprime les valeurs de la 2ème ligne et affiche les valeurs dans la 3ème colonne  
+`ma_matrice[c(4,6),c(1,3)]` : affiche les valeurs aux intersections des lignes 4 et 6 et des colonnes 1 et 3 si la matrice a au moins 3 colonnes et 6 lignes.  
+`ma_matrice[-c(4,6),-c(1,3)]` : affiche les valeurs absentes des lignes 4 et 6 et des colonnes 1 et 3 si la matrice a au moins 3 colonnes et 6 lignes.  
+`ma_matrice[c(4,6),]` :  affiche les valeurs des lignes 4 et 6 pour toutes les colonnes  
+`ma_matrice[,c(5,3)]` :  affiche les valeurs respectivement des colonnes 5 et 3 pour toutes les lignes.  
+
+`mon_tableau$nomcolon1` : affiche toutes les valeurs de la colonne "nomcolon1"  
+`mon_tableau$nomcolon1[3]` : affiche la 3ème valeur de la colonne "nomcolon1"  
+`mon_tableau[3, c(”nomcol1”, ”nomcol3”)]` : affiche les valeurs à l’intersection de la ligne 3 et des colonnes "nomcolon1" et "nomcolon3"  
+
+\pagebreak
+
+### 2.2 Les booléens 
+
+Un booléen est une variable de type logique qui a deux états VRAI ou FAUX (`TRUE` or `FALSE`). On peut utiliser des booléens pour comparer des valeurs pour cela on utilise les commandes suivantes :
+
+| Conditions initiales | Commandes R | Traduction en Français                                  | Résultats dans R   |
+|----------------------|-------------|---------------------------------------------------------|--------------------|
+|                      | `a==b`        | a égal à b                                              | `FALSE`            |
+|                      | `a!=b`        | a différent de b                                        | `TRUE`             |
+| `a <- 1`               | `a>b`         | a strictement supérieur à b                             | `FALSE`            |
+| `b <- 3`               | `a>=b`        | a supérieur ou égal b                                   | `FALSE`            |
+|                      | `a<b`         | a strictement inférieur à b                             | `TRUE`             |
+|                      | `a<=b`        | a inférieur ou égale à b                                | `TRUE`             |<br>
+|                      |             |                                                         |                    |
+| `a <- 1`               | `a==b & c>b`  | a égal à b ET c strictement supérieur à b               | `FALSE`            |
+| `b <- 3`               | `a==b | c>b`  | a égal à b OU c strictement supérieur à b               | `TRUE`             |
+| `c <- 4`               | `a<=b & c>b`  | a inférieur ou égale à b ET c strictement supérieur à b | `TRUE`             |
+|                      | `a>=b | c<b`  | a supérieur ou égale à b OU c strictement inférieur à b | `FALSE`            |
+
+#### Exercice 2
+
+Créez deux vecteurs numériques et comparer ces vecteurs à une valeur comprise au moins dans l’intervalle d’un des vecteurs en utilisant les booléens.
+
+```{r}
+
+```
+
+
+#### Exercice 3
+
+Testez et commentez le résultat de la commande suivante en s’adaptant aux objets que vous avez créés précédemment (ex: `tata <- toto[toto<=val_comp]`)
+
+#### Exercice 4
+
+Quel est le lien entre l’exercice 2 et l’exercice 3 ?
+
+#### Exercice 5
+
+Le commande == et != peuvent s’appliquer à des chaines de caractères. Les chaines de caractères doivent être **EXACTEMENT** identiques ou **STRICTEMENT** différentes.  
+
+Créez deux vecteurs de caractères et comparer ces vecteurs à une chaine de caractères présente dans l'un des deux vecteursen utilisant les booléens.
+
+\pagebreak
+
+## 3 Importation des données dans R 
+
+Rappel :
+
+| Format du fichier du tableur | Séparateur de colonne "sep" | Séparateur de décimales "dec" | Code R                                            |
+|------------------------------|-----------------------------|------------------------------|---------------------------------------------------|
+| .txt                         | espace                      | virgule*                     | `read.table("fichier.txt",sep=" ",dec=",",)`      |
+| .txt                         | tabulation                  | virgule*                     | `read.table("fichier.txt",sep="\t",dec=",",)`     |
+| .csv                         | point-virgule ";"           | virgule*                     | `read.table("fichier.csv",sep=";",dec=",",)`      |
+| .csv                         | virgule ","                 | virgule*                     | *INCOMPATIBLE AVEC LE SYSTEME DECIMAL Français*   |
+| .xls                         | tabulation                  | virgule*                     | `read.table("fichier.xls",sep="\t",dec=",",)`     |
+| .xlsx                        | tabulation                  | virgule*                     | Voir le package "readxl"                            |
+NB: * la virgule est le séparateur décimal en France, dans le système anglo-saxon le séparateur est le point.
+
+Si les colonnes du tableau de données ont un titre, il faut ajouter l’argument `header=TRUE`.
+
+Vous pouvez également utiliser les fonctions disponibles sans la librairie `readxl`
+
+
+#### Exercice 6 
+
+* Importez le fichier "donnees_sonde_rade.csv" dans R et assignez le dans l'objet `donneesSonde`
+* Importez le fichier "position_sonde_rade.csv" dans R et assignez le dans l'objet `positionSonde`
+
+
+#### Exercice 7
+
+Résumez les caractéristiques de chacune des variables du tableau de données importé :
+
+* Nom de la variable
+* Description
+* Etats ou unités
+* Types mathématiques (quantitatives, qualitatives, ...)
+* Type de la variable dans R
+
+|Type en français|Type R|Valeurs possibles|
+|----------------|------|-----------------|
+|Logique         |logical|`TRUE` or `FALSE`   |
+|Numérique       |numeric|`1, 1.2, exp(2)`  |
+|Chaine de caractères|character|`"s", "world"`   |
+|Non assigné         |na       |`NA`        |
+|Vide                |null     |`NULL`      |
+
+
+#### Exercice 8
+
+Explorer la nature et la structure du tableau de données à l’aide des fonctions suivantes :  
+`summary(), dim(), names(), class(), str()`  
+Commentez les résultats.
+
+
+#### Exercice 9
+
+Suite à l'utilisation de la fonction `summary()` et à vos connaissances en océanographie existe-t-il des valeurs aberrantes? Si oui, nettoyez le jeu de données. (indice `filter()` et les booléens)
+
+
+#### Exercice 10
+
+Dans le tableau de données que vous venez d'importer la profondeur est absente. Néanmoins vous pouvez la calculer à l'aide de la température, la salinité et de la pression.
+
+
+Créez une fonction permettant de calculer la profondeur en utilisant les équations suivantes et insérer le résultat dans une nouvelle colonne intitulée `profondeur`.
+$$H=\frac{P}{\rho \times g}$$
+et
+
+$$ \rho=\rho_0+AS+(BS)^{32}+CS$$
+avec
+
+$$\rho_0=999.842594+6.793952\times10^{-2}t-9.095290\times10^{-3}t^2+1.001685\times10^{-4}t^3-1.120083\times10^{-6}t^4+6.536336\times10^{-9}t^5$$
+
+$$A=8.24493\times10^{1}-4.0899\times10^{-3}t+7.6438\times10^{-5}t^2-8.2467\times10^{-7}t^3+5.3875\times10^{-9}t^4$$
+
+$$B=-5.72466\times10^{-3}+1.0227\times10^{-4}t-1.6546\times10^{-6}t^2$$
+
+$$C=4.8314\times10^{-4}$$
+
+
+## 4 Les séries statistiques simples 
+### 4.1	Variables binaires, qualitatives et semi-quantitatives 
+
+Avant de commencer les excercices donnez les définitions des termes suivants :
+
+* Variable binaire
+* Variable semi-quantitative
+* Variable qualitative
+
+Le diagramme en bâtons est la représentation la plus simple pour représenter graphiquement ces résultats. Dans R, la fonction associée dans la librairie `ggplot2` est `geom_bar()`. Pour utiliser la librairie `ggplot2`, il faut que le tableau suive les caractéristiques des tableaux `tidy` (voir la librairie `tidyverse`).
+
+Exemple :
+```{r}
+
+mondf <- tibble(lettres=LETTERS[1:8],value=sample(1:100,8))
+mondf
+ggplot(mondf,aes(x=lettres,y=value))+geom_bar(stat="identity")
+
+```
+
+
+L'argument `stat="identity"` permet d'afficher les valeurs présentes dans le tableau `mondf`.
+
+Je vous déconseille **FORTEMENT** d'utiliser la fonction `pie()` pour représenter ces types de variables.  
+Voici un extrait de la page d'aide :
+
+> "Pie charts are a very bad way of displaying information. The eye is good at judging linear measures and bad at judging relative areas. A bar chart or dot chart is a preferable way of displaying this type of data."
+
+
+#### Exercice 11
+
+En utilisant l’aide de R, résumez en quoi consiste la fonction `levels()`.  
+Appliquez cette fonction à la colonne « emplacement »
+
+#### Exercice 12
+
+Utilisez la fonction `count()` sur la variable emplacement? A quoi correspond le résultat?  
+Calculez les fréquences relatives et les pourcentages en utilisant la fonction `mutate()`? (indice `sum()`)
+
+#### Exercice 13
+
+Représentez graphiquement les fréquences relatives et les pourcentages à l'aide d'un diagramme en bâton.
+
+
+#### Exercice 14
+
+Représentez sur une même fenêtre graphique les fréquences absolues, les fréquences relatives, les fréquences cumulées et les pourcentages. (indices `gather()`, `facet_wrap()`, `facet_grid()`)
+
+
+### 4.2	Variables quantitatives 
+
+Rappelez ce qu'est une variable quantitative.
+
+La représentation graphique de la distribution de fréquence est réalisable à l’aide de la fonction `geom_histogram()`. Cette fonction utilise la fonction `nclass.sturge()` pour déterminer le nombre de classes.
+
+#### Exercice 15
+
+A l’aide la fonction `geom_histogram()`, affichez la distribution de fréquence de la température.
+
+#### Exercice 16
+
+Créez 4 histogrammes en faisant varier le nombre de classe à l'aide de l'argument `bins` de la fonction `geom_histogram()`
+
+#### Exercice 17
+
+Affichez les distributions de fréquences de toutes les variables (indice `gather()`)
+  
+## 5 Les séries statistiques doubles 
+### 5.1	Une variable quantitative et une variable qualitative 
+
+Le diagramme à moustache (`geom_boxplot()`) permet de visualiser les distributions de plusieurs groupes de valeurs.
+
+#### Exercice 18
+
+Rappeler schématiquement la structure d'un diagramme à moustache.
+
+#### Exercice 19
+
+Réalisez un diagramme à moustache de la température pour les différents emplacements.
+
+
+#### Exercice 20
+
+Réalisez un diagramme à moustache pour les différentes variables numériques. (indices `gather()`, `facet_grid()`,`facet_wrap()`)
+
+### 5.2	Deux variables quantitatives 
+
+Représentez deux variables quantitatives revient à réaliser un diagramme de dispersion en utilisant la fonction `geom_point()`. 
+
+
+#### Exercice 21
+
+Réalisez un diagramme de dispersion entre les variables suivantes :  
+
+- température
+- profondeur 
+- oxygène 
+- turbidité 
+
+Changer la couleur et le type de point en fonction de l'emplacement.
+
+
+## 6 A vous de jouer
+
+L’oxygène dissous peut s’exprimer en % de saturation, en ml/l, en mg/l et en $\mu$mol/l. Dans la littérature, cette variable est plus largement exprimée en ml/l. Dans cette partie, vous allez devoir créer deux nouvelles variables qui correspondent à la concentration en O2 dissous exprimée respectivement en ml/l et en mg/l.
+Vous avez les équations en cliquant sur [ce lien](http://envlit.ifremer.fr/var/envlit/storage/documents/dossiers/prelevementhydro/image/formuleconversiono2.xls).
+
+#### Exercice 22
+
+1. Créez une fonction qui converti le % de saturation en ml/l et en mg/l
+2. Représentez la concentration en O2 dissous en fonction de l'emplacement des sondes
+
+\includepdf[pages=-,angle=270]{base-r.pdf}
+\includepdf[pages=-,angle=270]{data-import.pdf}
+\includepdf[pages=-,angle=270]{data-transformation.pdf}
+\includepdf[pages=-,angle=270]{data-visualization.pdf}
+\includepdf[pages=-,angle=270]{advancedR.pdf}
